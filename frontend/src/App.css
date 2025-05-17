@@ -1,0 +1,56 @@
+.App {
+  text-align: center;
+}
+
+.navbar {
+  padding: 1rem;
+}
+
+.login-form {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.document-list, .message-list {
+  margin: 20px auto;
+}
+
+.document-card, .message-card {
+  margin-bottom: 15px;
+}
+
+/* Dark theme styles */
+body.dark-theme {
+  background-color: #222;
+  color: #eee;
+}
+
+body.dark-theme .card,
+body.dark-theme .modal-content {
+  background-color: #333;
+  color: #eee;
+}
+
+body.dark-theme .table {
+  color: #eee;
+}
+
+body.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+  background-color: #444;
+  color: #eee;
+  border-color: #555;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+  background-color: #444;
+  color: #eee;
+}
