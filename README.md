@@ -14,7 +14,11 @@ This application is fully portable and can be moved to any location on your comp
 ## Quick Start
 
 ### Running the Application
+<<<<<<< HEAD
 1. Double-click on the `universal-dms-launcher.bat` file (or `DMS-Launcher.exe` if provided)
+=======
+1. Double-click on the `DOC.exe` file
+>>>>>>> main
 2. The application will check for dependencies and install them if needed
 3. Both frontend and backend servers will start automatically
 4. The application will open in your default web browser
@@ -42,43 +46,6 @@ document-management-system/
 └── README.md                     # This file
 ```
 
-## Creating the Executable Launcher
-
-If you need to recreate the executable launcher, use one of these methods:
-
-### Method 1: Using .NET Framework
-1. Run `compile-launcher.bat` to compile the C# program
-2. This requires the .NET Framework to be installed
-
-### Method 2: Using .NET Core/.NET 5+
-1. Run `compile-dotnet.bat` to create a self-contained executable
-2. This requires the .NET SDK to be installed
-3. The resulting executable will be standalone and won't require .NET installed on the target machine
-
-## Deployment Guide
-
-### GitHub Deployment
-
-1. Create a GitHub account if you don't have one
-2. Create a new repository
-3. Push the code to GitHub:
-
-```bash
-# Initialize Git repository
-git init
-
-# Add all files
-git add .
-
-# Commit changes
-git commit -m "Initial commit"
-
-# Add remote repository URL (replace with your own)
-git remote add origin https://github.com/yourusername/document-management-system.git
-
-# Push to GitHub
-git push -u origin main
-```
 
 ### Running on Another PC
 
@@ -126,19 +93,6 @@ The startup script will automatically check for and install:
 - Data export capabilities
 
 ## Troubleshooting
-
-### Common Issues
-
-1. **PowerShell execution policy:** The launcher will automatically bypass this restriction, but if you're running the script directly, open PowerShell as Administrator and run:
-```powershell
-Set-ExecutionPolicy RemoteSigned
-```
-
-2. **Port conflicts:** If ports 3000 (frontend) or 5000 (backend) are in use, modify the startup commands in `start-dms.ps1`.
-
-3. **Dependency installation failures:** If automatic installation fails, install Node.js and Python manually from their official websites.
-
-4. **Launcher crashes:** Make sure the `start-dms.ps1` file is in the same directory as the executable.
 
 ### Manual Startup
 
