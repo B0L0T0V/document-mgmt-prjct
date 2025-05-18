@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Tab, Tabs, Alert, ListGroup, Modal, Dropdown } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
+import { useLanguage } from '../context/LanguageContext';
 
 function EditDocument() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === 'new';
+  const { t } = useLanguage();
   
   const [document, setDocument] = useState({
     number: '',
@@ -17,7 +19,8 @@ function EditDocument() {
     date: new Date().toISOString().split('T')[0],
     file: null,
     fileName: '',
-    content: 'This is a sample document content. In a real application, this would be the actual content of the document.'
+    content: 'Это образец содержания документа. В реальном приложении здесь будет фактическое содержание документа.',
+    originalFile: null // Store the original file blob
   });
   
   const [validated, setValidated] = useState(false);
@@ -27,13 +30,20 @@ function EditDocument() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportFormat, setExportFormat] = useState('docx');
   const [userRole, setUserRole] = useState('user');
+  const [encodingError, setEncodingError] = useState(false);
   
-  // Mock history data
+  // Function to format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
+  };
+  
+  // Mock history data in Russian
   const [history] = useState([
-    { id: 1, action: 'Document created', user: 'John Doe', date: '2023-01-15 09:30' },
-    { id: 2, action: 'Document updated', user: 'Jane Smith', date: '2023-01-17 14:22' },
-    { id: 3, action: 'Document sent for approval', user: 'John Doe', date: '2023-01-18 11:05' },
-    { id: 4, action: 'Document rejected', user: 'Mike Johnson', date: '2023-01-19 16:45', reason: 'Missing required information in section 3.' }
+    { id: 1, action: 'Документ создан', user: 'Вася Пупкин', date: '2023-01-15 09:30' },
+    { id: 2, action: 'Документ обновлен', user: 'Семен Семеныч', date: '2023-01-17 14:22' },
+    { id: 3, action: 'Документ отправлен на утверждение', user: 'Вася Пупкин', date: '2023-01-18 11:05' },
+    { id: 4, action: 'Документ отклонен', user: 'Руководитель', date: '2023-01-19 16:45', reason: 'Отсутствует необходимая информация в разделе 3.' }
   ]);
 
   useEffect(() => {
@@ -49,6 +59,11 @@ function EditDocument() {
       const existingDoc = documents.find(doc => doc.id.toString() === id.toString());
       
       if (existingDoc) {
+        // Convert base64 back to ArrayBuffer if it exists
+        if (existingDoc.originalFileBase64) {
+          existingDoc.originalFile = _base64ToArrayBuffer(existingDoc.originalFileBase64);
+          delete existingDoc.originalFileBase64; // Remove the base64 version to save memory
+        }
         setDocument(existingDoc);
       } else {
         // If document is not in localStorage, use mock data
@@ -59,39 +74,39 @@ function EditDocument() {
             
             const mockDocument = {
               id: parseInt(id),
-              number: `DOC-00${id}`,
-              type: 'Contract',
-              title: 'Sample Document',
-              description: 'This is a sample document for demonstration purposes.',
-              performer: 'John Doe',
+              number: `ДОК-00${id}`,
+              type: 'Договор',
+              title: 'Пример документа',
+              description: 'Это образец документа для демонстрационных целей.',
+              performer: 'Вася Пупкин',
               date: '2023-01-15',
-              fileName: 'sample.doc',
-              content: `This is the content of document ${id}. 
+              fileName: 'образец.doc',
+              content: `Это содержание документа ${id}. 
 
-In a real application, this would be the actual text content extracted from the uploaded document file.
+В реальном приложении здесь был бы фактический текст, извлеченный из загруженного файла документа.
 
-Section 1: Introduction
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vehicula, libero at commodo tempor, erat risus malesuada odio, at luctus purus mi quis mi.
+Раздел 1: Введение
+Лорем ипсум долор сит амет, консектетур адиписцинг элит. Нуллам вехикула, либеро ат коммодо темпор, ерат рисус малесуада одио, ат луктус пурус ми куис ми.
 
-Section 2: Terms and Conditions
-Maecenas vel est eget sapien consectetur efficitur. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Ut vel arcu quis velit eleifend venenatis.
+Раздел 2: Условия и положения
+Маеценас вел ест егет сапиен консектетур еффицитур. Вестибулум анте ипсум примис ин фаукибус орци луктус ет ултрицес посуере кубилиа курае; Ут вел арку куис велит елеифенд вененатис.
 
-Section 3: Responsibilities
-Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed consequat massa in urna blandit, eu ullamcorper nisl tincidunt.
+Раздел 3: Обязанности
+Пеллентеске хабитант морби тристикуе сенектус ет нетус ет малесуада фамес ак турпис егестас. Сед консекуат масса ин урна бландит, еу улламкорпер нисл тинцидунт.
 
-Section 4: Conclusion
-Nulla facilisi. In hac habitasse platea dictumst. Vivamus feugiat consequat velit, quis scelerisque purus pharetra vel.`
+Раздел 4: Заключение
+Нулла фацилиси. Ин хак хабитассе платеа диктумст. Вивамус феугиат консекуат велит, куис сцелериске пурус пхаретра вел.`
             };
             setDocument(mockDocument);
           } catch (err) {
-            setError('Failed to load document. Please try again.');
+            setError(t('failedToSave'));
           }
         };
         
         fetchDocument();
       }
     }
-  }, [id, isNew]);
+  }, [id, isNew, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,81 +116,124 @@ Nulla facilisi. In hac habitasse platea dictumst. Vivamus feugiat consequat veli
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // In a real application, we would extract content from the file here
-      // For demo purposes, we'll read the file as text if it's a text file,
-      // otherwise use a placeholder content
-      const reader = new FileReader();
+      // Try multiple encodings for better Russian text support
+      tryReadFile(file);
+    }
+  };
+
+  // Function to try different encodings for file reading
+  const tryReadFile = (file) => {
+    setEncodingError(false);
+    
+    // Store the original file for direct export
+    const binaryReader = new FileReader();
+    binaryReader.onload = (event) => {
+      setDocument(prev => ({
+        ...prev,
+        originalFile: event.target.result // Store the binary data
+      }));
+    };
+    binaryReader.readAsArrayBuffer(file);
+    
+    // Check if this is a binary document format that shouldn't be read as text
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const binaryDocFormats = ['doc', 'docx', 'pdf', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp'];
+    
+    if (binaryDocFormats.includes(fileExtension)) {
+      // Don't try to read binary formats as text, just use a placeholder
+      const placeholderContent = `[${t('binaryDocumentFormat')}: ${file.name}]
+
+${t('previewNotAvailable')}
+
+${t('documentInfo')}:
+- ${t('fileName')}: ${file.name}
+- ${t('fileType')}: ${file.type || fileExtension.toUpperCase()}
+- ${t('fileSize')}: ${(file.size / 1024).toFixed(2)} KB
+- ${t('lastModified')}: ${new Date(file.lastModified).toLocaleString()}
+
+${t('exportOriginalMessage')}`;
       
-      reader.onload = (event) => {
-        let fileContent;
-        
-        try {
-          // Try to read file as text with proper encoding detection
-          // This supports Cyrillic and other non-Latin characters
-          fileContent = event.target.result;
-          
-          // Test if the content appears to be broken (might be binary or needs encoding fix)
-          const hasBrokenEncoding = /\uFFFD/.test(fileContent); // Unicode replacement character indicates encoding issues
-          const appearsEmpty = !fileContent || fileContent.length < 10;
-          
-          if (appearsEmpty || hasBrokenEncoding) {
-            // If we have encoding issues but it's likely a text file, try a different approach
-            if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-              // For text files with potential encoding issues, try again with explicit UTF-8
-              const readerUtf8 = new FileReader();
-              readerUtf8.onload = (e) => {
-                setDocument(prev => ({ 
-                  ...prev, 
-                  fileName: file.name,
-                  fileData: {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    lastModified: file.lastModified
-                  },
-                  content: e.target.result
-                }));
-              };
-              readerUtf8.readAsText(file, 'UTF-8');
-              return;
-            } else {
-              throw new Error('Not a readable text file or encoding issues');
-            }
-          }
-        } catch (err) {
-          // Use placeholder content for non-text files
-          fileContent = `Content extracted from ${file.name}
-
-Section 1: Introduction
-This document was uploaded at ${new Date().toLocaleString()}.
-This is a preview of the document content that would be extracted from the uploaded file.
-
-Section 2: Details
-In a real application, document parsing libraries would extract the actual content from the file.
-
-Document: ${file.name}
-Size: ${Math.round(file.size / 1024)} KB
-Type: ${file.type || 'Unknown'} 
-`;
-        }
-        
+      setDocument(prev => ({
+        ...prev,
+        fileName: file.name,
+        fileData: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified,
+          isBinary: true
+        },
+        content: placeholderContent
+      }));
+      
+      return; // Skip text reading for binary formats
+    }
+    
+    // Continue with text extraction for text-based files
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      
+      // Check if content has visible Cyrillic characters
+      if (/[а-яА-ЯёЁ]/.test(content)) {
+        // Successfully read Russian text
         setDocument(prev => ({ 
           ...prev, 
           fileName: file.name,
-          // Store file metadata that can be saved to localStorage
           fileData: {
             name: file.name,
             size: file.size,
             type: file.type,
             lastModified: file.lastModified
           },
-          content: fileContent
+          content: content
         }));
-      };
-      
-      // Try to read as text with encoding detection
-      reader.readAsText(file, 'UTF-8');
-    }
+      } else {
+        // Try windows-1251 (common for older Russian text files)
+        tryFallbackEncoding(file);
+      }
+    };
+    
+    reader.onerror = () => {
+      // If error occurs during reading, try fallback
+      tryFallbackEncoding(file);
+    };
+    
+    // Try to read as text with UTF-8 encoding
+    reader.readAsText(file, 'UTF-8');
+  };
+  
+  // Fallback function for handling encoding issues
+  const tryFallbackEncoding = (file) => {
+    // In a real app, we'd try windows-1251 or other encodings
+    // For this demo, we'll use a placeholder with proper Russian text
+    setEncodingError(true);
+    
+    const placeholderContent = `Содержимое файла ${file.name}
+
+Раздел 1: Введение
+Этот документ был загружен ${new Date().toLocaleString()}.
+Это предварительный просмотр содержания документа, которое будет извлечено из загруженного файла.
+
+Раздел 2: Подробности
+В реальном приложении библиотеки для анализа документов будут извлекать фактическое содержание из файла.
+
+Документ: ${file.name}
+Размер: ${Math.round(file.size / 1024)} КБ
+Тип: ${file.type || 'Неизвестный'}
+Дата модификации: ${new Date(file.lastModified).toLocaleString()}`;
+    
+    setDocument(prev => ({ 
+      ...prev, 
+      fileName: file.name,
+      fileData: {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      },
+      content: placeholderContent
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -196,52 +254,74 @@ Type: ${file.type || 'Unknown'}
       const documents = JSON.parse(localStorage.getItem('documents') || '[]');
       
       // Create a version of the document suitable for localStorage
-      // (without the actual file object which can't be serialized)
       const docToSave = {
         ...document,
-        file: null // Remove the actual file object
+        file: undefined,  // Remove the actual file object
+        // Save originalFile if it exists as a base64 string
+        originalFileBase64: document.originalFile ? 
+          _arrayBufferToBase64(document.originalFile) : 
+          null,
+        originalFile: undefined, // Remove the binary from the object itself
+        // Ensure we have valid dates
+        created_at: document.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
       if (isNew) {
-        const newDoc = {
-          ...docToSave,
-          id: Date.now(), // Use timestamp as ID for demo
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          status: 'draft',
-          author: JSON.parse(localStorage.getItem('user') || '{}').username || 'Current User'
-        };
-        documents.push(newDoc);
+        // Assign new ID for new document
+        docToSave.id = documents.length > 0 ? Math.max(...documents.map(d => d.id)) + 1 : 1;
+        docToSave.status = 'draft';
+        docToSave.author = JSON.parse(localStorage.getItem('user') || '{}').username || 'Пользователь';
+        
+        documents.push(docToSave);
+        setSuccess(t('documentCreated'));
       } else {
+        // Update existing document
         const index = documents.findIndex(doc => doc.id.toString() === id.toString());
         if (index !== -1) {
-          documents[index] = {
-            ...documents[index],
-            ...docToSave,
-            updated_at: new Date().toISOString()
-          };
+          documents[index] = { ...documents[index], ...docToSave };
         } else {
-          // If document doesn't exist in localStorage yet, add it
-          documents.push({
-            ...docToSave,
-            id: parseInt(id),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            status: 'draft',
-            author: JSON.parse(localStorage.getItem('user') || '{}').username || 'Current User'
-          });
+          docToSave.id = parseInt(id);
+          documents.push(docToSave);
         }
+        setSuccess(t('documentUpdated'));
       }
       
       localStorage.setItem('documents', JSON.stringify(documents));
       
-      setSuccess(`Document ${isNew ? 'created' : 'updated'} successfully!`);
+      // Redirect to documents list after a short delay
       setTimeout(() => {
         navigate('/documents');
-      }, 2000);
+      }, 1500);
     } catch (err) {
-      setError('Failed to save document. Please try again.');
+      setError(t('failedToSave'));
     }
+  };
+
+  // Helper function to convert ArrayBuffer to Base64 string for storage
+  const _arrayBufferToBase64 = (buffer) => {
+    if (!buffer) return null;
+    
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+  // Helper function to convert Base64 string back to ArrayBuffer
+  const _base64ToArrayBuffer = (base64) => {
+    if (!base64) return null;
+    
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
   };
 
   const handleExport = () => {
@@ -249,49 +329,52 @@ Type: ${file.type || 'Unknown'}
   };
 
   const performExport = () => {
-    // In a real app, this would call an API to generate the document in the selected format
     setShowExportModal(false);
+    setSuccess(`${t('documentExported')} (${exportFormat})`);
     
-    // Create a text blob from the document content
-    const blob = new Blob([document.content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    
-    // Determine the file extension
-    let extension;
-    if (exportFormat === 'docx') {
-      extension = '.docx';
-    } else if (exportFormat === 'xlsx') {
-      extension = '.xlsx';
-    } else {
-      extension = '.pdf';
-    }
-    
-    // Clean the document title for use in filename
-    const filename = `${document.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}${extension}`;
-    
-    // Create a download link and trigger it
-    const element = document.createElement('a');
-    element.href = url;
-    element.download = filename;
-    document.body.appendChild(element);
-    element.click();
-    
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(element);
+    // Use the original file if available, otherwise create a text export
+    if (document.originalFile) {
+      // Use the original file without encoding issues
+      const blob = new Blob([document.originalFile], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const domDocument = window.document;
+      const a = domDocument.createElement('a');
+      a.href = url;
+      
+      // Keep the original file extension if possible
+      const extension = document.fileName.split('.').pop();
+      a.download = `${document.title || 'document'}.${extension || exportFormat}`;
+      
+      domDocument.body.appendChild(a);
+      a.click();
+      domDocument.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 100);
+    } else {
+      // Fallback to text export if original not available
+      const blobContent = `${document.content}
+
+---
+${t('exportedOn')}: ${new Date().toLocaleString()}
+${t('documentNumber')}: ${document.number}
+${t('status')}: ${document.status || t('draft')}
+`;
     
-    alert(`Document has been exported as ${filename}`);
+      const blob = new Blob([blobContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const domDocument = window.document;
+      const a = domDocument.createElement('a');
+      a.href = url;
+      a.download = `${document.title || 'document'}.${exportFormat}`;
+      domDocument.body.appendChild(a);
+      a.click();
+      domDocument.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handleSubmitForApproval = async () => {
-    if (!window.confirm('Are you sure you want to submit this document for approval?')) {
-      return;
-    }
-    
     try {
-      // Mock API call
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
       // Update document status in localStorage
@@ -299,136 +382,134 @@ Type: ${file.type || 'Unknown'}
       const index = documents.findIndex(doc => doc.id.toString() === id.toString());
       
       if (index !== -1) {
-        documents[index] = {
-          ...documents[index],
-          status: 'pending',
-          updated_at: new Date().toISOString()
-        };
+        documents[index].status = 'pending';
+        documents[index].updated_at = new Date().toISOString();
         localStorage.setItem('documents', JSON.stringify(documents));
+        setSuccess(t('documentSubmitted'));
+        
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate('/documents');
+        }, 1500);
+      } else {
+        throw new Error('Document not found');
       }
-      
-      setSuccess('Document submitted for approval successfully!');
-      setTimeout(() => {
-        navigate('/documents');
-      }, 2000);
     } catch (err) {
-      setError('Failed to submit document for approval. Please try again.');
+      setError(t('failedToSubmit'));
     }
+  };
+
+  // Helper function to translate document type
+  const translateDocumentType = (type) => {
+    if (!type) return '';
+    
+    // Map English types to translation keys
+    const typeMapping = {
+      'Contract': 'contract',
+      'Report': 'report',
+      'Agreement': 'agreement',
+      'Memo': 'memo'
+    };
+    
+    // If it's an English type, use the mapping to get the translation key
+    if (typeMapping[type]) {
+      return t(typeMapping[type]);
+    }
+    
+    // If it's already in Russian, return as is
+    return type;
   };
 
   return (
     <>
       <NavigationBar />
-      <Container className="mt-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2>{isNew ? 'Create New Document' : 'Edit Document'}</h2>
-          
-          {!isNew && (
-            <div>
-              <Button 
-                variant="outline-primary" 
-                className="me-2" 
-                onClick={handleExport}
-              >
-                Export
-              </Button>
-              
-              {document.status !== 'pending' && document.status !== 'approved' && (
-                <Button 
-                  variant="primary" 
-                  onClick={handleSubmitForApproval}
-                >
-                  Submit for Approval
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+      <Container className="my-4">
+        <h2>{isNew ? t('createNewDocument') : t('editDocument')}</h2>
         
-        {error && <Alert variant="danger">{error}</Alert>}
-        {success && <Alert variant="success">{success}</Alert>}
+        {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+        {success && <Alert variant="success" onClose={() => setSuccess('')} dismissible>{success}</Alert>}
         
-        <Tabs defaultActiveKey="details" className="mb-3">
-          <Tab eventKey="details" title="Document Details">
+        <Tabs defaultActiveKey="details" id="document-tabs" className="mb-3">
+          <Tab eventKey="details" title={t('documentDetails')}>
             <Form noValidate validated={validated} onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Document Number</Form.Label>
+                <Form.Label>{t('documentNumber')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="number"
                   value={document.number}
                   onChange={handleChange}
-                  placeholder="Enter document number"
+                  placeholder={t('enterDocumentNumber')}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Please enter a document number.
+                  {t('pleaseEnterDocumentNumber')}
                 </Form.Control.Feedback>
               </Form.Group>
-
+              
               <Form.Group className="mb-3">
-                <Form.Label>Document Type</Form.Label>
+                <Form.Label>{t('documentType')}</Form.Label>
                 <Form.Select
                   name="type"
                   value={document.type}
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Select type...</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Report">Report</option>
-                  <option value="Agreement">Agreement</option>
-                  <option value="Memo">Memo</option>
+                  <option value="">{t('selectType')}</option>
+                  <option value="Договор">{t('contract')}</option>
+                  <option value="Отчет">{t('report')}</option>
+                  <option value="Соглашение">{t('agreement')}</option>
+                  <option value="Служебная записка">{t('memo')}</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">
-                  Please select a document type.
+                  {t('pleaseSelectDocumentType')}
                 </Form.Control.Feedback>
               </Form.Group>
-
+              
               <Form.Group className="mb-3">
-                <Form.Label>Title</Form.Label>
+                <Form.Label>{t('title')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="title"
                   value={document.title}
                   onChange={handleChange}
-                  placeholder="Enter document title"
+                  placeholder={t('enterDocumentTitle')}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Please enter a document title.
+                  {t('pleaseEnterDocumentTitle')}
                 </Form.Control.Feedback>
               </Form.Group>
-
+              
               <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('description')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   name="description"
                   value={document.description}
                   onChange={handleChange}
-                  placeholder="Enter document description"
+                  placeholder={t('enterDocumentDescription')}
                 />
               </Form.Group>
-
+              
               <Form.Group className="mb-3">
-                <Form.Label>Performer</Form.Label>
+                <Form.Label>{t('performer')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="performer"
                   value={document.performer}
                   onChange={handleChange}
-                  placeholder="Enter performer name"
+                  placeholder={t('enterPerformerName')}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Please enter a performer name.
+                  {t('pleaseEnterPerformerName')}
                 </Form.Control.Feedback>
               </Form.Group>
-
+              
               <Form.Group className="mb-3">
-                <Form.Label>Date</Form.Label>
+                <Form.Label>{t('date')}</Form.Label>
                 <Form.Control
                   type="date"
                   name="date"
@@ -437,70 +518,93 @@ Type: ${file.type || 'Unknown'}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Please select a date.
+                  {t('pleaseSelectDate')}
                 </Form.Control.Feedback>
               </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Document Content</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  name="content"
-                  value={document.content}
-                  onChange={handleChange}
-                  placeholder="Enter document content"
-                />
-                <Form.Text className="text-muted">
-                  You can manually edit the document content here or upload a file below.
-                </Form.Text>
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Upload Document (DOC/DOCX format)</Form.Label>
-                <Form.Control
-                  type="file"
-                  accept=".doc,.docx,.txt,.pdf"
-                  onChange={handleFileChange}
-                />
-                {document.fileName && (
-                  <div className="mt-2">
-                    <strong>Current file:</strong> {document.fileName} 
-                    <Button 
-                      variant="link" 
-                      size="sm" 
-                      onClick={() => setShowPreview(true)}
-                    >
-                      View
-                    </Button>
-                  </div>
-                )}
-              </Form.Group>
-
-              <div className="d-flex justify-content-between mt-4">
+              
+              <div className="d-flex justify-content-between">
                 <Button variant="secondary" onClick={() => navigate('/documents')}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button variant="primary" type="submit">
-                  {isNew ? 'Create Document' : 'Save Changes'}
+                  {isNew ? t('create') : t('save')}
                 </Button>
               </div>
             </Form>
           </Tab>
           
+          <Tab eventKey="content" title={t('content')}>
+            <div className="mb-3 p-2 border rounded">
+              <Form.Group className="mb-3">
+                <Form.Label>{t('uploadDocument')}</Form.Label>
+                <Form.Control
+                  type="file"
+                  onChange={handleFileChange}
+                />
+                <Form.Text>
+                  {document.fileName && (
+                    <>
+                      {t('currentFile')}: {document.fileName} 
+                      <Button 
+                        variant="link" 
+                        size="sm" 
+                        onClick={() => setShowPreview(true)}
+                      >
+                        {t('view')}
+                      </Button>
+                    </>
+                  )}
+                </Form.Text>
+                {encodingError && (
+                  <Alert variant="info" className="mt-2">
+                    {t('russianTextError')}
+                  </Alert>
+                )}
+              </Form.Group>
+              
+              <Form.Group>
+                <Form.Label>{t('content')}</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={12}
+                  name="content"
+                  value={document.content}
+                  onChange={handleChange}
+                  placeholder={t('enterContent')}
+                />
+              </Form.Group>
+            </div>
+            
+            <div className="d-flex justify-content-between">
+              <Button variant="secondary" onClick={() => navigate('/documents')}>
+                {t('cancel')}
+              </Button>
+              <div>
+                <Button variant="info" className="me-2" onClick={handleExport}>
+                  {t('export')}
+                </Button>
+                {!isNew && document.status !== 'approved' && document.status !== 'pending' && (
+                  <Button variant="primary" onClick={handleSubmitForApproval}>
+                    {t('submitForApproval')}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Tab>
+          
           {!isNew && (
-            <Tab eventKey="history" title="History">
-              <ListGroup>
-                {history.map(entry => (
-                  <ListGroup.Item key={entry.id}>
+            <Tab eventKey="history" title={t('history')}>
+              <ListGroup className="mb-3">
+                {history.map(item => (
+                  <ListGroup.Item key={item.id} className="d-flex flex-column">
                     <div className="d-flex justify-content-between">
-                      <strong>{entry.action}</strong>
-                      <span>{entry.date}</span>
+                      <strong>{item.action}</strong>
+                      <small>{item.date}</small>
                     </div>
-                    <div>User: {entry.user}</div>
-                    {entry.reason && (
-                      <div className="text-danger mt-2">
-                        <strong>Reason:</strong> {entry.reason}
+                    <div className="text-muted">{t('user')}: {item.user}</div>
+                    {item.reason && (
+                      <div className="mt-2 text-danger">
+                        {t('reasonForRejection')}: {item.reason}
                       </div>
                     )}
                   </ListGroup.Item>
@@ -509,90 +613,73 @@ Type: ${file.type || 'Unknown'}
             </Tab>
           )}
         </Tabs>
-        
-        {/* Document Preview Modal */}
-        <Modal 
-          show={showPreview} 
-          onHide={() => setShowPreview(false)} 
-          size="lg"
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Document Preview - {document.title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div style={{ 
-              padding: '30px', 
-              backgroundColor: '#fff', 
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              fontFamily: 'Arial, sans-serif',
-              fontSize: '14px',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-wrap'
-            }}>
-              <div style={{ borderBottom: '1px solid #ddd', paddingBottom: '15px', marginBottom: '15px' }}>
-                <h4 style={{ fontWeight: 'bold' }}>{document.title}</h4>
-                <div><strong>Document Number:</strong> {document.number}</div>
-                <div><strong>Type:</strong> {document.type}</div>
-                <div><strong>Date:</strong> {new Date(document.date).toLocaleDateString()}</div>
-                <div><strong>Performer:</strong> {document.performer}</div>
-                {document.fileName && (
-                  <div><strong>File:</strong> {document.fileName}</div>
-                )}
-              </div>
-              
-              {document.content}
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-primary" onClick={handleExport}>
-              Export
-            </Button>
-            <Button variant="secondary" onClick={() => setShowPreview(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        
-        {/* Export Modal */}
-        <Modal 
-          show={showExportModal} 
-          onHide={() => setShowExportModal(false)}
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Export Document</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Export Format</Form.Label>
-                <Form.Select
-                  value={exportFormat}
-                  onChange={(e) => setExportFormat(e.target.value)}
-                >
-                  <option value="docx">Microsoft Word (.docx)</option>
-                  <option value="xlsx">Microsoft Excel (.xlsx)</option>
-                  <option value="pdf">PDF Document (.pdf)</option>
-                </Form.Select>
-              </Form.Group>
-              <p className="text-muted">
-                The document will be exported with all current content and metadata.
-              </p>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowExportModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={performExport}>
-              Export
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </Container>
+      
+      {/* Document Preview Modal */}
+      <Modal 
+        show={showPreview} 
+        onHide={() => setShowPreview(false)} 
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{t('documentPreview')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            {document.fileName && (
+              <p className="fw-bold">
+                {t('filePreview')}: {document.fileName}
+              </p>
+            )}
+          </div>
+          <div style={{ 
+            whiteSpace: 'pre-wrap', 
+            fontFamily: '"Courier New", Courier, monospace', 
+            fontSize: '14px'
+          }} 
+          className="document-preview-content p-3 border rounded"
+          >
+            {document.content}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPreview(false)}>
+            {t('close')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* Export Modal */}
+      <Modal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{t('exportDocument')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{t('exportDescription')}</p>
+          <Form.Group className="mb-3">
+            <Form.Label>{t('exportFormat')}</Form.Label>
+            <Form.Select 
+              value={exportFormat} 
+              onChange={(e) => setExportFormat(e.target.value)}
+            >
+              <option value="docx">{t('word')}</option>
+              <option value="xlsx">{t('excel')}</option>
+              <option value="pdf">{t('pdf')}</option>
+            </Form.Select>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowExportModal(false)}>
+            {t('cancel')}
+          </Button>
+          <Button variant="primary" onClick={performExport}>
+            {t('export')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

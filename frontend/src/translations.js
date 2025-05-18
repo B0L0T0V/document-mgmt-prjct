@@ -249,6 +249,27 @@ const translations = {
     pleaseFillAllRequired: "Please fill in all required fields",
     pleaseConfirmSignature: "Please fill in all fields and confirm your signature",
     pleaseProvideReason: "Please provide a reason for rejection",
+    
+    // Additional translations
+    noHistoryFound: "No history records found.",
+    editButton: "Edit",
+    russianTextError: "Error displaying Russian text",
+    missingInformation: "Missing required information",
+    exportedOn: "Exported on",
+    preview: "Preview",
+    filePreview: "File Preview",
+    me: "Me",
+    usernameOrPasswordIncorrect: "Invalid username or password",
+    
+    // Binary document handling
+    binaryDocumentFormat: "Binary Document Format",
+    previewNotAvailable: "Preview not available for this document type. The original file will be stored and can be exported without modification.",
+    documentInfo: "Document Information",
+    fileName: "File Name",
+    fileType: "File Type",
+    fileSize: "File Size",
+    lastModified: "Last Modified",
+    exportOriginalMessage: "Use the Export button to download the original file."
   },
   ru: {
     // Navigation
@@ -409,8 +430,8 @@ const translations = {
     passwordLeaveBlank: "Пароль (оставьте пустым, чтобы сохранить текущий)",
     role: "Роль",
     created: "Создан",
-    user: "Пользователь",
-    manager: "Менеджер",
+    user: "Исполнитель",
+    manager: "Руководитель",
     admin: "Администратор",
     confirmDeleteUser: "Вы уверены, что хотите удалить этого пользователя?",
     userUpdated: "Пользователь успешно обновлен",
@@ -499,6 +520,32 @@ const translations = {
     pleaseFillAllRequired: "Пожалуйста, заполните все обязательные поля",
     pleaseConfirmSignature: "Пожалуйста, заполните все поля и подтвердите подпись",
     pleaseProvideReason: "Пожалуйста, укажите причину отклонения",
+    
+    // Fixes for buttons and labels
+    editButton: "Редактирование",
+    edit: "Редактирование",
+    
+    // Additional translations
+    noHistoryFound: "Записи истории не найдены",
+    russianTextError: "Ошибка отображения русского текста",
+    missingInformation: "Отсутствует необходимая информация",
+    exportedOn: "Экспортировано",
+    preview: "Предпросмотр",
+    filePreview: "Предпросмотр файла",
+    me: "Я",
+    usernameOrPasswordIncorrect: "Неверное имя пользователя или пароль",
+    
+    // Binary document handling
+    binaryDocumentFormat: "Бинарный формат документа",
+    previewNotAvailable: "Предварительный просмотр недоступен для этого типа документа. Оригинальный файл будет сохранен и может быть экспортирован без изменений.",
+    documentInfo: "Информация о документе",
+    fileName: "Имя файла",
+    fileType: "Тип файла",
+    fileSize: "Размер файла",
+    lastModified: "Дата изменения",
+    exportOriginalMessage: "Используйте кнопку Экспорт, чтобы скачать оригинальный файл.",
+    exportedOn: "Экспортировано",
+    russianTextError: "Невозможно правильно отобразить некоторые русские символы. Документ будет сохранен корректно при экспорте"
   }
 };
 

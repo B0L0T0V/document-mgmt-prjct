@@ -22,7 +22,7 @@ function Login() {
       const defaultUsers = [
         {
           id: 1,
-          username: 'admin',
+          username: 'администратор',
           email: 'admin@example.com',
           password: 'admin123',
           role: 'admin',
@@ -31,7 +31,7 @@ function Login() {
         },
         {
           id: 2,
-          username: 'manager',
+          username: 'руководитель',
           email: 'manager@example.com',
           password: 'manager123',
           role: 'manager',
@@ -40,7 +40,7 @@ function Login() {
         },
         {
           id: 3,
-          username: 'user',
+          username: 'исполнитель',
           email: 'user@example.com',
           password: 'user123',
           role: 'user',
@@ -89,7 +89,7 @@ function Login() {
       localStorage.setItem('user', JSON.stringify(user));
       navigate('/dashboard');
     } else {
-      setError('Invalid username or password');
+      setError(t('usernameOrPasswordIncorrect') || 'Неверное имя пользователя или пароль');
     }
   };
 
@@ -99,7 +99,7 @@ function Login() {
     const defaultUsers = [
       {
         id: 1,
-        username: 'admin',
+        username: 'администратор',
         email: 'admin@example.com',
         password: 'admin123',
         role: 'admin',
@@ -108,7 +108,7 @@ function Login() {
       },
       {
         id: 2,
-        username: 'manager',
+        username: 'руководитель',
         email: 'manager@example.com',
         password: 'manager123',
         role: 'manager',
@@ -117,7 +117,7 @@ function Login() {
       },
       {
         id: 3,
-        username: 'user',
+        username: 'исполнитель',
         email: 'user@example.com',
         password: 'user123',
         role: 'user',
@@ -130,7 +130,7 @@ function Login() {
     localStorage.removeItem('user');
     localStorage.setItem('users', JSON.stringify(defaultUsers));
     
-    setSuccess('User data has been reset. You can now login with the default credentials.');
+    setSuccess('Данные пользователей были сброшены. Теперь вы можете войти с помощью учетных данных по умолчанию.');
   };
 
   return (
@@ -174,15 +174,15 @@ function Login() {
             </div>
 
             <div className="mt-4">
-              <h6 className="mb-2">Test accounts:</h6>
+              <h6 className="mb-2">Тестовые учетные записи:</h6>
               <div className="small">
-                <p className="mb-1"><strong>Admin:</strong> admin / admin123</p>
-                <p className="mb-1"><strong>Manager:</strong> manager / manager123</p>
-                <p className="mb-0"><strong>User:</strong> user / user123</p>
+                <p className="mb-1"><strong>Администратор:</strong> администратор / admin123</p>
+                <p className="mb-1"><strong>Руководитель:</strong> руководитель / manager123</p>
+                <p className="mb-0"><strong>Исполнитель:</strong> исполнитель / user123</p>
               </div>
               <div className="mt-3 text-center">
                 <Button variant="outline-secondary" size="sm" onClick={resetUsersData}>
-                  Reset User Data
+                  Сбросить данные пользователей
                 </Button>
               </div>
             </div>

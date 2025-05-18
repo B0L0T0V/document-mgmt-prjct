@@ -14,19 +14,17 @@ This application is fully portable and can be moved to any location on your comp
 ## Quick Start
 
 ### Running the Application
-<<<<<<< HEAD
 1. Double-click on the `universal-dms-launcher.bat` file (or `DMS-Launcher.exe` if provided)
-=======
-1. Double-click on the `DOC.exe` file
->>>>>>> main
+
+
 2. The application will check for dependencies and install them if needed
 3. Both frontend and backend servers will start automatically
 4. The application will open in your default web browser
 
 ### Default Login Credentials
-- Admin: `admin` / `admin123`
-- Manager: `manager` / `manager123`
-- User: `user` / `user123`
+- Администратор: `администратор` / `admin123`
+- Руководитель: `руководитель` / `manager123`
+- Исполнитель: `исполнитель` / `user123`
 
 ## Repository Structure
 
@@ -93,6 +91,19 @@ The startup script will automatically check for and install:
 - Data export capabilities
 
 ## Troubleshooting
+
+### Common Issues
+
+1. **PowerShell execution policy:** The launcher will automatically bypass this restriction, but if you're running the script directly, open PowerShell as Administrator and run:
+```powershell
+Set-ExecutionPolicy RemoteSigned
+```
+
+2. **Port conflicts:** If ports 3000 (frontend) or 5000 (backend) are in use, modify the startup commands in `start-dms.ps1`.
+
+3. **Dependency installation failures:** If automatic installation fails, install Node.js and Python manually from their official websites.
+
+4. **Launcher crashes:** Make sure the `start-dms.ps1` file is in the same directory as the executable.
 
 ### Manual Startup
 

@@ -6,13 +6,16 @@ const LanguageContext = createContext();
 export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState('ru');
   
   // Load language from localStorage on initial render
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
       setLanguage(savedLanguage);
+    } else {
+      // Set Russian as the default language
+      localStorage.setItem('language', 'ru');
     }
   }, []);
   
@@ -24,8 +27,8 @@ export const LanguageProvider = ({ children }) => {
   
   // Translation function
   const t = (key) => {
-    if (!translations[language]) return translations.en[key] || key;
-    return translations[language][key] || translations.en[key] || key;
+    if (!translations[language]) return translations.ru[key] || key;
+    return translations[language][key] || translations.ru[key] || key;
   };
   
   const contextValue = {

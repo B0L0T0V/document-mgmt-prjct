@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, InputGroup, Badge, Modal, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
+import { useLanguage } from '../context/LanguageContext';
 
 function Documents() {
+  const { t, language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -32,37 +34,48 @@ function Documents() {
       const mockDocuments = [
         { 
           id: 1, 
-          number: 'DOC-001', 
-          title: 'Service Agreement',
-          type: 'Contract', 
-          performer: 'John Doe', 
+          number: 'ДОК-001', 
+          title: 'Договор об оказании услуг',
+          type: 'Договор', 
+          performer: 'Вася Пупкин', 
           status: 'draft', 
-          author: 'John Doe',
+          author: 'Вася Пупкин',
           created_at: '2023-01-15T10:30:00Z',
           updated_at: '2023-01-15T10:30:00Z'
         },
         { 
           id: 2, 
-          number: 'DOC-002', 
-          title: 'Quarterly Results',
-          type: 'Report', 
-          performer: 'Jane Smith', 
+          number: 'ДОК-002', 
+          title: 'Квартальный отчет',
+          type: 'Отчет', 
+          performer: 'Семен Семеныч', 
           status: 'approved', 
-          author: 'Jane Smith',
+          author: 'Семен Семеныч',
           created_at: '2023-02-20T14:15:00Z',
           updated_at: '2023-02-25T09:45:00Z'
         },
         { 
           id: 3, 
-          number: 'DOC-003', 
-          title: 'Partnership Agreement',
-          type: 'Agreement', 
-          performer: 'Mike Brown', 
+          number: 'ДОК-003', 
+          title: 'Соглашение о партнерстве',
+          type: 'Соглашение', 
+          performer: 'Гриша Попов', 
           status: 'pending', 
-          author: 'Mike Brown',
+          author: 'Гриша Попов',
           created_at: '2023-03-10T11:20:00Z',
           updated_at: '2023-03-10T11:20:00Z'
         },
+        { 
+          id: 4, 
+          number: 'ДОК-004', 
+          title: 'Служебная записка о проекте',
+          type: 'Служебная записка', 
+          performer: 'Артем Сом', 
+          status: 'rejected', 
+          author: 'Артем Сом',
+          created_at: '2023-04-05T09:15:00Z',
+          updated_at: '2023-04-05T09:15:00Z'
+        }
       ];
       
       localStorage.setItem('documents', JSON.stringify(mockDocuments));
@@ -99,10 +112,25 @@ function Documents() {
       // Save to localStorage
       localStorage.setItem('documents', JSON.stringify(updatedDocuments));
       
-      setSuccess(`Document "${documentToDelete.title}" has been deleted.`);
+      // Add to history
+      const historyEntry = {
+        id: Date.now(),
+        document_id: documentToDelete.id,
+        document_title: documentToDelete.title,
+        action: "удаление",
+        user: JSON.parse(localStorage.getItem('user') || '{}').username || 'Пользователь',
+        timestamp: new Date().toISOString(),
+        reason: null
+      };
+      
+      const history = JSON.parse(localStorage.getItem('document_history') || '[]');
+      history.push(historyEntry);
+      localStorage.setItem('document_history', JSON.stringify(history));
+      
+      setSuccess(t('documentDeleted'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Failed to delete document. Please try again.');
+      setError(t('failedToDelete'));
     }
     
     setShowDeleteModal(false);
@@ -125,6 +153,20 @@ function Documents() {
         return 'danger';
       default:
         return 'secondary';
+    }
+  };
+
+  // Get translated status text
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'approved':
+        return t('approved');
+      case 'pending':
+        return t('pending');
+      case 'rejected':
+        return t('rejected');
+      default:
+        return t('draft');
     }
   };
 
@@ -156,8 +198,8 @@ function Documents() {
       <NavigationBar />
       <Container className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Documents</h2>
-          <Link to="/documents/new" className="btn btn-primary">New Document</Link>
+          <h2>{t('documents')}</h2>
+          <Link to="/documents/new" className="btn btn-primary">{t('createNewDocument')}</Link>
         </div>
         
         {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
@@ -165,7 +207,7 @@ function Documents() {
         
         <InputGroup className="mb-3">
           <Form.Control
-            placeholder="Search by title, type, number or performer..."
+            placeholder={t('searchDocuments')}
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -174,7 +216,7 @@ function Documents() {
               variant="outline-secondary" 
               onClick={() => setSearchTerm('')}
             >
-              Clear
+              {t('clear')}
             </Button>
           )}
         </InputGroup>
@@ -182,13 +224,13 @@ function Documents() {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th onClick={() => handleSort('number')}>Number {sortBy === 'number' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('title')}>Title {sortBy === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('type')}>Type {sortBy === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('performer')}>Performer {sortBy === 'performer' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('status')}>Status {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('updated_at')}>Last Updated {sortBy === 'updated_at' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th>Actions</th>
+              <th onClick={() => handleSort('number')}>{t('number')} {sortBy === 'number' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th onClick={() => handleSort('title')}>{t('title')} {sortBy === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th onClick={() => handleSort('type')}>{t('type')} {sortBy === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th onClick={() => handleSort('performer')}>{t('performer')} {sortBy === 'performer' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th onClick={() => handleSort('status')}>{t('status')} {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th onClick={() => handleSort('updated_at')}>{t('lastUpdated')} {sortBy === 'updated_at' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <th>{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -200,19 +242,19 @@ function Documents() {
                 <td>{doc.performer}</td>
                 <td>
                   <Badge bg={getStatusBadge(doc.status)}>
-                    {doc.status ? doc.status.charAt(0).toUpperCase() + doc.status.slice(1) : 'Draft'}
+                    {getStatusText(doc.status)}
                   </Badge>
                 </td>
                 <td>{formatDate(doc.updated_at)}</td>
                 <td>
-                  <Link to={`/documents/${doc.id}`} className="btn btn-sm btn-info me-2">View/Edit</Link>
+                  <Link to={`/documents/${doc.id}`} className="btn btn-sm btn-info me-2">{t('viewEdit')}</Link>
                   {(userRole === 'admin' || (doc.status !== 'approved' && doc.status !== 'pending')) && (
                     <Button 
                       variant="danger" 
                       size="sm" 
                       onClick={() => handleDeleteClick(doc)}
                     >
-                      Delete
+                      {t('delete')}
                     </Button>
                   )}
                 </td>
@@ -220,7 +262,7 @@ function Documents() {
             ))}
             {filteredDocuments.length === 0 && (
               <tr>
-                <td colSpan="7" className="text-center">No documents found</td>
+                <td colSpan="7" className="text-center">{t('noDocumentsFound')}</td>
               </tr>
             )}
           </tbody>
@@ -230,18 +272,18 @@ function Documents() {
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
+          <Modal.Title>{t('confirmDelete')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Are you sure you want to delete the document "{documentToDelete?.title}"?</p>
-          <p className="text-danger">This action cannot be undone.</p>
+          <p>{t('areYouSureDelete')} "{documentToDelete?.title}"?</p>
+          <p className="text-danger">{t('cannotBeUndone')}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button variant="danger" onClick={confirmDelete}>
-            Delete
+            {t('delete')}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -23,16 +23,23 @@ function Messages() {
     if (storedMessages.length === 0) {
       // Initial default messages if none exist
       const defaultMessages = [
-        { id: 1, sender: 'John Doe', recipient: 'Me', subject: 'Document Review', content: 'Please review the attached document', date: '2023-03-15', read: true },
-        { id: 2, sender: 'Jane Smith', recipient: 'Me', subject: 'Meeting tomorrow', content: 'Reminder about our meeting at 10 AM', date: '2023-03-14', read: false },
-        { id: 3, sender: 'Me', recipient: 'Mike Brown', subject: 'Project Update', content: 'Here is the latest update on the project', date: '2023-03-10', read: true },
+        { id: 1, sender: 'Вася Пупкин', recipient: t('me'), subject: 'Обзор Документа', content: 'Пожалуйста, проверьте приложенный документ', date: '2023-03-15', read: true },
+        { id: 2, sender: 'Семен Семеныч', recipient: t('me'), subject: 'Встреча Завтра', content: 'Напоминание о нашем собрании в 10 утра', date: '2023-03-14', read: false },
+        { id: 3, sender: t('me'), recipient: 'Артем Сом', subject: 'Обновление Проекта', content: 'Вот последние обновления проекта', date: '2023-03-10', read: true },
       ];
       setMessages(defaultMessages);
       localStorage.setItem('messages', JSON.stringify(defaultMessages));
     } else {
-      setMessages(storedMessages);
+      // Replace any existing "Me" with translated version
+      const updatedMessages = storedMessages.map(msg => ({
+        ...msg,
+        sender: msg.sender === 'Me' ? t('me') : msg.sender,
+        recipient: msg.recipient === 'Me' ? t('me') : msg.recipient
+      }));
+      setMessages(updatedMessages);
+      localStorage.setItem('messages', JSON.stringify(updatedMessages));
     }
-  }, []);
+  }, [t]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -62,7 +69,7 @@ function Messages() {
   const handleSendMessage = () => {
     // Get current user
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const sender = user.username || 'Me';
+    const sender = user.username || t('me');
     
     // Create new message with logged timestamp
     const newMsg = {
@@ -92,7 +99,7 @@ function Messages() {
 
   const handleViewMessage = (msg) => {
     // If the message is unread, mark it as read
-    if (!msg.read && msg.recipient === 'Me') {
+    if (!msg.read && msg.recipient === t('me')) {
       const updatedMessages = messages.map(m => 
         m.id === msg.id ? { ...m, read: true } : m
       );
@@ -125,9 +132,9 @@ function Messages() {
 
   // Filter and sort messages
   const filteredMessages = messages.filter(msg => 
-    msg.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    msg.sender.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    msg.recipient.toLowerCase().includes(searchTerm.toLowerCase())
+    (msg.subject && msg.subject.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (msg.sender && msg.sender.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (msg.recipient && msg.recipient.toLowerCase().includes(searchTerm.toLowerCase()))
   ).sort((a, b) => {
     if (a[sortBy] < b[sortBy]) return sortOrder === 'asc' ? -1 : 1;
     if (a[sortBy] > b[sortBy]) return sortOrder === 'asc' ? 1 : -1;
@@ -164,7 +171,7 @@ function Messages() {
           </thead>
           <tbody>
             {filteredMessages.map(msg => (
-              <tr key={msg.id} className={!msg.read && msg.recipient === 'Me' ? 'fw-bold' : ''}>
+              <tr key={msg.id} className={!msg.read && msg.recipient === t('me') ? 'fw-bold' : ''}>
                 <td>{msg.sender}</td>
                 <td>{msg.recipient}</td>
                 <td>{msg.subject}</td>

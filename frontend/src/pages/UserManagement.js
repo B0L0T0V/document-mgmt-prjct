@@ -39,7 +39,7 @@ const UserManagement = () => {
           const defaultUsers = [
             {
               id: 1,
-              username: 'admin',
+              username: 'администратор',
               email: 'admin@example.com',
               password: 'admin123',
               role: 'admin',
@@ -47,7 +47,7 @@ const UserManagement = () => {
             },
             {
               id: 2,
-              username: 'manager',
+              username: 'руководитель',
               email: 'manager@example.com',
               password: 'manager123',
               role: 'manager',
@@ -55,7 +55,7 @@ const UserManagement = () => {
             },
             {
               id: 3,
-              username: 'user',
+              username: 'исполнитель',
               email: 'user@example.com',
               password: 'user123',
               role: 'user',
@@ -298,7 +298,9 @@ const UserManagement = () => {
                             user.role === 'admin' ? 'bg-danger' : 
                             user.role === 'manager' ? 'bg-warning' : 'bg-primary'
                           }`}>
-                            {user.role}
+                            {user.role === 'admin' ? t('admin') : 
+                             user.role === 'manager' ? t('manager') : 
+                             t('user')}
                           </span>
                         </td>
                         <td>{formatDate(user.created_at)}</td>
