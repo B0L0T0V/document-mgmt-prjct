@@ -35,14 +35,34 @@
 echo Starting Document Management System...
 echo.
 
+REM Get the directory where the script is running
+set "SCRIPT_DIR=%~dp0"
+set "BACKEND_DIR=%SCRIPT_DIR%backend"
+set "FRONTEND_DIR=%SCRIPT_DIR%frontend"
+
+REM Try to find Python - first try python in PATH, then try "py" launcher
+where python >nul 2>&1
+if %ERRORLEVEL% == 0 (
+    set PYTHON_CMD=python
+) else (
+    where py >nul 2>&1
+    if %ERRORLEVEL% == 0 (
+        set PYTHON_CMD=py
+    ) else (
+        echo Python not found. Please install Python and add it to your PATH.
+        pause
+        exit /b 1
+    )
+)
+
 REM Start the backend server
-start cmd /k "cd D:\PROG\backend && D:\PYCH\venv\Scripts\python run.py"
+start cmd /k "cd /d "%BACKEND_DIR%" && %PYTHON_CMD% run.py"
 
 REM Wait a moment to ensure backend starts first
 timeout /t 5 /nobreak
 
 REM Start the frontend server
-start cmd /k "cd D:\PROG\frontend && npm start"
+start cmd /k "cd /d "%FRONTEND_DIR%" && npm start"
 
 echo.
 echo Servers are starting...

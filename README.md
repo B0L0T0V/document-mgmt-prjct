@@ -2,10 +2,19 @@
 
 A web-based Document Management System with React frontend and FastAPI backend. Features include role-based access control, document management, approval workflows, and bilingual support (English/Russian).
 
+## Portability
+
+This application is fully portable and can be moved to any location on your computer:
+
+- All paths are relative to the application directory
+- You can place the application on any drive (C:, D:, E:, etc.)
+- You can rename the parent folder without breaking functionality
+- The launchers automatically detect their location and adjust paths accordingly
+
 ## Quick Start
 
 ### Running the Application
-1. Double-click on the `DMS-Launcher.exe` file
+1. Double-click on the `universal-dms-launcher.bat` file (or `DMS-Launcher.exe` if provided)
 2. The application will check for dependencies and install them if needed
 3. Both frontend and backend servers will start automatically
 4. The application will open in your default web browser
@@ -19,16 +28,18 @@ A web-based Document Management System with React frontend and FastAPI backend. 
 
 ```
 document-management-system/
-├── frontend/                 # React frontend
-│   ├── src/                  # Source files
-│   ├── public/               # Static files
-│   └── package.json          # Dependencies
-├── backend/                  # FastAPI backend
-│   ├── app/                  # API code
-│   └── requirements.txt      # Dependencies
-├── DMS-Launcher.exe          # Executable launcher
-├── start-dms.ps1             # PowerShell script used by the launcher
-└── README.md                 # This file
+├── frontend/                     # React frontend
+│   ├── src/                      # Source files
+│   ├── public/                   # Static files
+│   └── package.json              # Dependencies
+├── backend/                      # FastAPI backend
+│   ├── app/                      # API code
+│   └── requirements.txt          # Dependencies
+├── universal-dms-launcher.bat    # Main batch launcher
+├── start.bat                     # Alternative batch launcher
+├── run.bat                       # Simple launcher
+├── start-dms.ps1                 # PowerShell launcher script
+└── README.md                     # This file
 ```
 
 ## Creating the Executable Launcher
@@ -74,18 +85,18 @@ git push -u origin main
 1. Clone the repository or download the files:
 ```bash
 git clone https://github.com/yourusername/document-management-system.git
-cd document-management-system
 ```
 
-2. Set up the configuration:
-   - Edit the paths in `start-dms.ps1` if needed
-   - Make sure the paths match your local setup
-
-3. Run the application:
-   - Double-click on `DMS-Launcher.exe`
-   - The executable will run the PowerShell script with execution policy bypass
+2. Run the application:
+   - Simply double-click on `universal-dms-launcher.bat`
    - The script will check for dependencies and install if necessary
    - The application will start automatically
+   - No configuration changes needed - the application is fully portable!
+
+3. Moving the application:
+   - You can move the entire application folder to any location on your PC
+   - You can rename the parent folder without breaking functionality
+   - All scripts use relative paths that automatically adjust to their location
 
 ## System Requirements
 

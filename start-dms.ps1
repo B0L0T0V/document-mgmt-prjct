@@ -6,9 +6,10 @@ Write-Host "Checking dependencies..." -ForegroundColor Cyan
 
 $ErrorActionPreference = "Stop"
 
-# Set paths
-$frontendPath = "D:\PROG\frontend"
-$backendPath = "D:\PROG\frontend\..\backend"
+# Set paths relative to script location
+$scriptDir = $PSScriptRoot
+$frontendPath = Join-Path -Path $scriptDir -ChildPath "frontend"
+$backendPath = Join-Path -Path $scriptDir -ChildPath "backend"
 
 # Function to check if command exists
 function Test-CommandExists {
