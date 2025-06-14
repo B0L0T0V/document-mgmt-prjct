@@ -23,64 +23,9 @@ function Documents() {
     if (userData && userData.role) {
       setUserRole(userData.role);
     }
-    
-    // Load documents from localStorage or use mock data if none exists
+    // Load documents from localStorage or use empty array if none exists
     const storedDocuments = JSON.parse(localStorage.getItem('documents') || '[]');
-    
-    if (storedDocuments.length > 0) {
-      setDocuments(storedDocuments);
-    } else {
-      // Mock initial documents data
-      const mockDocuments = [
-        { 
-          id: 1, 
-          number: 'ДОК-001', 
-          title: 'Договор об оказании услуг',
-          type: 'Договор', 
-          performer: 'Вася Пупкин', 
-          status: 'draft', 
-          author: 'Вася Пупкин',
-          created_at: '2023-01-15T10:30:00Z',
-          updated_at: '2023-01-15T10:30:00Z'
-        },
-        { 
-          id: 2, 
-          number: 'ДОК-002', 
-          title: 'Квартальный отчет',
-          type: 'Отчет', 
-          performer: 'Семен Семеныч', 
-          status: 'approved', 
-          author: 'Семен Семеныч',
-          created_at: '2023-02-20T14:15:00Z',
-          updated_at: '2023-02-25T09:45:00Z'
-        },
-        { 
-          id: 3, 
-          number: 'ДОК-003', 
-          title: 'Соглашение о партнерстве',
-          type: 'Соглашение', 
-          performer: 'Гриша Попов', 
-          status: 'pending', 
-          author: 'Гриша Попов',
-          created_at: '2023-03-10T11:20:00Z',
-          updated_at: '2023-03-10T11:20:00Z'
-        },
-        { 
-          id: 4, 
-          number: 'ДОК-004', 
-          title: 'Служебная записка о проекте',
-          type: 'Служебная записка', 
-          performer: 'Артем Сом', 
-          status: 'rejected', 
-          author: 'Артем Сом',
-          created_at: '2023-04-05T09:15:00Z',
-          updated_at: '2023-04-05T09:15:00Z'
-        }
-      ];
-      
-      localStorage.setItem('documents', JSON.stringify(mockDocuments));
-      setDocuments(mockDocuments);
-    }
+    setDocuments(storedDocuments);
   }, []);
 
   const handleSearch = (e) => {

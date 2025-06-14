@@ -38,14 +38,6 @@ function EditDocument() {
     return new Date(dateString).toLocaleDateString();
   };
   
-  // Mock history data in Russian
-  const [history] = useState([
-    { id: 1, action: 'Документ создан', user: 'Вася Пупкин', date: '2023-01-15 09:30' },
-    { id: 2, action: 'Документ обновлен', user: 'Семен Семеныч', date: '2023-01-17 14:22' },
-    { id: 3, action: 'Документ отправлен на утверждение', user: 'Вася Пупкин', date: '2023-01-18 11:05' },
-    { id: 4, action: 'Документ отклонен', user: 'Руководитель', date: '2023-01-19 16:45', reason: 'Отсутствует необходимая информация в разделе 3.' }
-  ]);
-
   useEffect(() => {
     // Load user role from localStorage
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -236,6 +228,23 @@ ${t('exportOriginalMessage')}`;
     }));
   };
 
+  const logDocumentHistory = (action, docId, docTitle, reason = null) => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const username = user.username || 'Пользователь';
+    const history = JSON.parse(localStorage.getItem('document_history') || '[]');
+    const newLog = {
+      id: Date.now(),
+      document_id: docId,
+      document_title: docTitle,
+      action,
+      user: username,
+      timestamp: new Date().toISOString(),
+      reason
+    };
+    history.push(newLog);
+    localStorage.setItem('document_history', JSON.stringify(history));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -272,9 +281,10 @@ ${t('exportOriginalMessage')}`;
         docToSave.id = documents.length > 0 ? Math.max(...documents.map(d => d.id)) + 1 : 1;
         docToSave.status = 'draft';
         docToSave.author = JSON.parse(localStorage.getItem('user') || '{}').username || 'Пользователь';
-        
         documents.push(docToSave);
         setSuccess(t('documentCreated'));
+        // Log creation with correct id and title
+        logDocumentHistory(t('documentCreated'), docToSave.id, docToSave.title);
       } else {
         // Update existing document
         const index = documents.findIndex(doc => doc.id.toString() === id.toString());
@@ -285,6 +295,8 @@ ${t('exportOriginalMessage')}`;
           documents.push(docToSave);
         }
         setSuccess(t('documentUpdated'));
+        // Log update with correct id and title
+        logDocumentHistory(t('documentUpdated'), docToSave.id, docToSave.title);
       }
       
       localStorage.setItem('documents', JSON.stringify(documents));
@@ -386,6 +398,8 @@ ${t('status')}: ${document.status || t('draft')}
         documents[index].updated_at = new Date().toISOString();
         localStorage.setItem('documents', JSON.stringify(documents));
         setSuccess(t('documentSubmitted'));
+        // Log submit for approval with correct id and title
+        logDocumentHistory(t('documentSubmitted'), documents[index].id, documents[index].title);
         
         // Redirect after short delay
         setTimeout(() => {
@@ -595,11 +609,11 @@ ${t('status')}: ${document.status || t('draft')}
           {!isNew && (
             <Tab eventKey="history" title={t('history')}>
               <ListGroup className="mb-3">
-                {history.map(item => (
+                {JSON.parse(localStorage.getItem('document_history') || '[]').map(item => (
                   <ListGroup.Item key={item.id} className="d-flex flex-column">
                     <div className="d-flex justify-content-between">
                       <strong>{item.action}</strong>
-                      <small>{item.date}</small>
+                      <small>{item.timestamp}</small>
                     </div>
                     <div className="text-muted">{t('user')}: {item.user}</div>
                     {item.reason && (

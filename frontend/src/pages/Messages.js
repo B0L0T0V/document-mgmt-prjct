@@ -16,6 +16,9 @@ function Messages() {
   });
   
   const [messages, setMessages] = useState([]);
+  const [userRole, setUserRole] = useState('user');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState(null);
 
   // Load messages from localStorage on component mount
   useEffect(() => {
@@ -47,6 +50,14 @@ function Messages() {
       localStorage.setItem('messages', JSON.stringify(messages));
     }
   }, [messages]);
+
+  useEffect(() => {
+    // Load user role from localStorage
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (userData && userData.role) {
+      setUserRole(userData.role);
+    }
+  }, []);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -111,6 +122,21 @@ function Messages() {
     }
     
     alert(`${t('messageContent')}: ${msg.content}`);
+  };
+
+  const handleDeleteClick = (msg) => {
+    setMessageToDelete(msg);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (!messageToDelete) return;
+    const updatedMessages = messages.filter(m => m.id !== messageToDelete.id);
+    setMessages(updatedMessages);
+    localStorage.setItem('messages', JSON.stringify(updatedMessages));
+    logActivity(`${t('delete')}: ${messageToDelete.subject}`);
+    setShowDeleteModal(false);
+    setMessageToDelete(null);
   };
 
   // Function to log activity
@@ -181,6 +207,16 @@ function Messages() {
                   <Button variant="info" size="sm" onClick={() => handleViewMessage(msg)}>
                     {t('view')}
                   </Button>
+                  {(userRole === 'admin' || userRole === 'manager') && (
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      className="ms-2"
+                      onClick={() => handleDeleteClick(msg)}
+                    >
+                      {t('delete')}
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -247,6 +283,24 @@ function Messages() {
               disabled={!newMessage.recipient || !newMessage.subject || !newMessage.content}
             >
               {t('sendMessage')}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{t('confirmDelete')}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>{t('areYouSureDelete')} "{messageToDelete?.subject}"?</p>
+            <p className="text-danger">{t('cannotBeUndone')}</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              {t('cancel')}
+            </Button>
+            <Button variant="danger" onClick={confirmDelete}>
+              {t('delete')}
             </Button>
           </Modal.Footer>
         </Modal>

@@ -269,7 +269,10 @@ const translations = {
     fileType: "File Type",
     fileSize: "File Size",
     lastModified: "Last Modified",
-    exportOriginalMessage: "Use the Export button to download the original file."
+    exportOriginalMessage: "Use the Export button to download the original file.",
+    clearHistory: "Clear History",
+    confirmClearHistory: "Confirm Clear History",
+    areYouSureClearHistory: "Are you sure you want to clear the entire history?"
   },
   ru: {
     // Navigation
@@ -377,7 +380,7 @@ const translations = {
     
     // Modals
     confirmDelete: "Подтвердите удаление",
-    areYouSureDelete: "Вы уверены что хотите удалить документ",
+    areYouSureDelete: "Вы уверены что хотите удалить сообщение",
     cannotBeUndone: "Это действие нельзя отменить.",
     documentPreview: "Предварительный просмотр документа",
     exportDocument: "Экспорт документа",
@@ -544,8 +547,9 @@ const translations = {
     fileSize: "Размер файла",
     lastModified: "Дата изменения",
     exportOriginalMessage: "Используйте кнопку Экспорт, чтобы скачать оригинальный файл.",
-    exportedOn: "Экспортировано",
-    russianTextError: "Невозможно правильно отобразить некоторые русские символы. Документ будет сохранен корректно при экспорте"
+    clearHistory: "Очистить историю",
+    confirmClearHistory: "Подтвердите очистку истории",
+    areYouSureClearHistory: "Вы уверены, что хотите полностью очистить историю?"
   }
 };
 

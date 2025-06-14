@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Card, Alert } from 'react-bootstrap';
+import { Container, Table, Card, Alert, Button, Modal } from 'react-bootstrap';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -8,116 +8,54 @@ const History = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState('user');
+  const [showClearModal, setShowClearModal] = useState(false);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setLoading(true);
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        
-        if (!user || !user.id) {
-          setError(t('pleaseFillAllRequired'));
-          setLoading(false);
-          return;
-        }
-        
-        // Instead of actual API call that fails, use mock data
-        const mockHistory = [
-          {
-            id: 1,
-            document_id: 1,
-            document_title: "Договор об оказании услуг",
-            action: "создание",
-            user: "Вася Пупкин",
-            timestamp: "2023-01-15T10:30:00Z",
-            reason: null
-          },
-          {
-            id: 2,
-            document_id: 2,
-            document_title: "Квартальный отчет",
-            action: "создание",
-            user: "Семен Семеныч",
-            timestamp: "2023-02-20T14:15:00Z",
-            reason: null
-          },
-          {
-            id: 3,
-            document_id: 2,
-            document_title: "Квартальный отчет",
-            action: "утверждение",
-            user: "Руководитель",
-            timestamp: "2023-02-25T09:45:00Z",
-            reason: null
-          },
-          {
-            id: 4,
-            document_id: 3,
-            document_title: "Соглашение о партнерстве",
-            action: "создание",
-            user: "Гриша Попов",
-            timestamp: "2023-03-10T11:20:00Z",
-            reason: null
-          },
-          {
-            id: 5,
-            document_id: 3,
-            document_title: "Соглашение о партнерстве",
-            action: "отправка на утверждение",
-            user: "Гриша Попов",
-            timestamp: "2023-03-10T11:45:00Z",
-            reason: null
-          },
-          {
-            id: 6,
-            document_id: 4,
-            document_title: "Служебная записка о проекте",
-            action: "создание",
-            user: "Артем Сом",
-            timestamp: "2023-04-05T09:15:00Z",
-            reason: null
-          },
-          {
-            id: 7,
-            document_id: 4,
-            document_title: "Служебная записка о проекте",
-            action: "отклонение",
-            user: "Руководитель",
-            timestamp: "2023-04-06T14:30:00Z",
-            reason: "Отсутствует необходимая информация в разделе 3"
-          }
-        ];
-        
-        // Save the mock data to localStorage for persistence
-        localStorage.setItem('document_history', JSON.stringify(mockHistory));
-        
-        setHistory(mockHistory);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    // Try to get history from localStorage first
-    const storedHistory = JSON.parse(localStorage.getItem('document_history') || '[]');
-    if (storedHistory.length > 0) {
+    setLoading(true);
+    setError(null);
+    // Poll for history updates every 2 seconds
+    const interval = setInterval(() => {
+      const storedHistory = JSON.parse(localStorage.getItem('document_history') || '[]');
       setHistory(storedHistory);
       setLoading(false);
-    } else {
-      fetchHistory();
+    }, 2000);
+    // Initial load
+    const storedHistory = JSON.parse(localStorage.getItem('document_history') || '[]');
+    setHistory(storedHistory);
+    setLoading(false);
+    // Load user role from localStorage
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (userData && userData.role) {
+      setUserRole(userData.role);
     }
+    return () => clearInterval(interval);
   }, [t]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
 
+  const handleClearHistory = () => {
+    setShowClearModal(true);
+  };
+
+  const confirmClearHistory = () => {
+    localStorage.setItem('document_history', '[]');
+    setHistory([]);
+    setShowClearModal(false);
+  };
+
   return (
     <>
       <NavigationBar />
       <Container className="mt-4">
-        <h2>{t('history')}</h2>
+        <div className="mt-4 d-flex justify-content-between align-items-center">
+          <h2>{t('history')}</h2>
+          {userRole === 'admin' && (
+            <Button variant="danger" onClick={handleClearHistory}>{t('clearHistory')}</Button>
+          )}
+        </div>
         
         {error && <Alert variant="danger">{error}</Alert>}
 
@@ -156,6 +94,19 @@ const History = () => {
           </Card>
         )}
       </Container>
+      <Modal show={showClearModal} onHide={() => setShowClearModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('confirmClearHistory')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{t('areYouSureClearHistory')}</p>
+          <p className="text-danger">{t('cannotBeUndone')}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowClearModal(false)}>{t('cancel')}</Button>
+          <Button variant="danger" onClick={confirmClearHistory}>{t('clearHistory')}</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
