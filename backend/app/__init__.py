@@ -5,6 +5,8 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 import os
 
+# --- Инициализация Flask-приложения и расширений ---
+# Здесь создаются экземпляры расширений, настраивается приложение, регистрируются blueprints
 # Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()

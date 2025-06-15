@@ -8,6 +8,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    # --- Регистрация нового пользователя ---
     data = request.get_json()
 
     # Check if required fields are in the request
@@ -51,6 +52,7 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    # --- Вход пользователя ---
     data = request.get_json()
 
     # Check if required fields are in the request
@@ -79,6 +81,7 @@ def login():
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
+    # --- Получение профиля текущего пользователя ---
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
 
@@ -91,6 +94,7 @@ def profile():
 @auth_bp.route('/settings', methods=['PUT'])
 @jwt_required()
 def update_settings():
+    # --- Обновление настроек пользователя (тема, пароль) ---
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
 

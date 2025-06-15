@@ -4,6 +4,8 @@ from sqlalchemy.sql import func
 import datetime
 
 
+# --- Модель пользователя ---
+# Описывает пользователя системы, его роль, настройки, связи с документами и сообщениями
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -41,6 +43,8 @@ class User(db.Model):
         }
 
 
+# --- Модель документа ---
+# Описывает документ, его автора, статус, файл, историю изменений
 class Document(db.Model):
     __tablename__ = 'documents'
 
@@ -81,6 +85,8 @@ class Document(db.Model):
         }
 
 
+# --- Модель истории документа ---
+# Фиксирует действия над документом (создание, обновление, утверждение и т.д.)
 class DocumentHistory(db.Model):
     __tablename__ = 'document_history'
 
@@ -106,6 +112,8 @@ class DocumentHistory(db.Model):
         }
 
 
+# --- Модель сообщения ---
+# Описывает личные сообщения между пользователями
 class Message(db.Model):
     __tablename__ = 'messages'
 

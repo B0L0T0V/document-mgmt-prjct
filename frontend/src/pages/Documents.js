@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница списка документов ---
+// Здесь реализованы функции поиска, сортировки, удаления документов, отображения статуса и действий
+// Данные берутся из localStorage
 function Documents() {
   const { t, language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');

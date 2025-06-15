@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import translations from '../translations';
 
+// --- Контекст языка ---
+// Обеспечивает хранение и смену языка интерфейса, а также функцию перевода
 const LanguageContext = createContext();
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -8,7 +10,7 @@ export const useLanguage = () => useContext(LanguageContext);
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('ru');
   
-  // Load language from localStorage on initial render
+  // --- Загрузка языка из localStorage при инициализации ---
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
@@ -19,13 +21,13 @@ export const LanguageProvider = ({ children }) => {
     }
   }, []);
   
-  // Function to change language
+  // --- Функция смены языка ---
   const changeLanguage = (lang) => {
     setLanguage(lang);
     localStorage.setItem('language', lang);
   };
   
-  // Translation function
+  // --- Функция перевода по ключу ---
   const t = (key) => {
     if (!translations[language]) return translations.ru[key] || key;
     return translations[language][key] || translations.ru[key] || key;

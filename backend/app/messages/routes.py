@@ -5,6 +5,10 @@ from app.models import db, Message, User
 messages_bp = Blueprint('messages', __name__)
 
 
+# --- Маршруты для работы с сообщениями ---
+# Здесь реализованы функции для получения, создания, просмотра и отметки сообщений как прочитанных
+# Используется Flask Blueprint для организации маршрутов
+
 @messages_bp.route('', methods=['GET'])
 @jwt_required()
 def get_messages():

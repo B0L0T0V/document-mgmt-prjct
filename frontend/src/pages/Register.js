@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 
+// --- Страница регистрации пользователя ---
+// Позволяет создать нового пользователя, проверяет уникальность имени и корректность пароля
 function Register() {
   const [formData, setFormData] = useState({
     username: '',

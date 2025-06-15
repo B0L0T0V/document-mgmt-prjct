@@ -3,6 +3,9 @@ import { Container, Table, Button, Card, Modal, Form, Alert } from 'react-bootst
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница управления пользователями ---
+// Здесь реализованы функции просмотра, создания, редактирования, удаления пользователей, логирования действий
+// Данные берутся и сохраняются в localStorage
 const UserManagement = () => {
   const { t } = useLanguage();
   const [users, setUsers] = useState([]);
@@ -19,6 +22,7 @@ const UserManagement = () => {
     role: 'user'
   });
 
+  // --- Загрузка пользователей и проверка прав администратора ---
   useEffect(() => {
     const fetchUsers = () => {
       try {
@@ -236,6 +240,7 @@ const UserManagement = () => {
     }
   };
   
+  // --- Логирование действий администратора ---
   // Function to log activity
   const logActivity = (action) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

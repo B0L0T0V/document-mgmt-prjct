@@ -4,6 +4,9 @@ import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
+// --- Страница согласования документов ---
+// Здесь реализованы функции просмотра, утверждения, отклонения документов, электронная подпись, логирование
+// Данные берутся и сохраняются в localStorage
 const Approval = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -20,6 +23,7 @@ const Approval = () => {
     confirmed: false
   });
 
+  // --- Загрузка документов на согласование, проверка прав ---
   useEffect(() => {
     const fetchPendingDocuments = () => {
       try {

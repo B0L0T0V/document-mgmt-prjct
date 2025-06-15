@@ -3,11 +3,14 @@ import { Container, Accordion, Card, Button, Form, InputGroup, Modal } from 'rea
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница справки и поддержки ---
+// Здесь реализованы функции поиска по справочным темам, отображения инструкций, открытия модального окна поддержки
 const Help = () => {
   const { t, language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showSupportModal, setShowSupportModal] = useState(false);
   
+  // --- Темы справки на английском и русском языках ---
   const helpTopicsEn = [
     {
       title: 'Getting Started',

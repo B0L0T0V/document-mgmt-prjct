@@ -3,6 +3,9 @@ import { Container, Table, Button, Form, InputGroup, Modal } from 'react-bootstr
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница сообщений ---
+// Здесь реализованы функции просмотра, поиска, сортировки, создания, удаления и логирования сообщений
+// Данные берутся и сохраняются в localStorage
 function Messages() {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +23,7 @@ function Messages() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
 
-  // Load messages from localStorage on component mount
+  // --- Загрузка сообщений и роли пользователя из localStorage ---
   useEffect(() => {
     const storedMessages = JSON.parse(localStorage.getItem('messages') || '[]');
     if (storedMessages.length === 0) {
@@ -59,6 +62,7 @@ function Messages() {
     }
   }, []);
 
+  // --- Обработка поиска и сортировки сообщений ---
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -139,6 +143,7 @@ function Messages() {
     setMessageToDelete(null);
   };
 
+  // --- Логирование действий пользователя ---
   // Function to log activity
   const logActivity = (action) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -156,6 +161,7 @@ function Messages() {
     localStorage.setItem('activityLogs', JSON.stringify(updatedLogs));
   };
 
+  // --- Фильтрация и сортировка сообщений для отображения ---
   // Filter and sort messages
   const filteredMessages = messages.filter(msg => 
     (msg.subject && msg.subject.toLowerCase().includes(searchTerm.toLowerCase())) ||

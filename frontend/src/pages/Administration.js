@@ -29,6 +29,9 @@ const Administration = () => {
   });
 
   useEffect(() => {
+    // --- Страница администрирования системы ---
+    // Здесь реализованы функции управления пользователями, документами, настройками системы, экспортом и логированием
+    // Данные берутся и сохраняются в localStorage
     // Check if user is admin
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user || user.role !== 'admin') {
@@ -66,6 +69,7 @@ const Administration = () => {
   }, [navigate, t]);
 
   const handleExportData = () => {
+    // --- Экспорт данных и логов, очистка логов ---
     // Get all data from localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const documents = JSON.parse(localStorage.getItem('documents') || '[]');
@@ -140,6 +144,7 @@ const Administration = () => {
     logActivity(t('documentSettingsUpdated'));
   };
   
+  // --- Логирование действий администратора ---
   // Function to log activity
   const logActivity = (action) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -160,6 +165,7 @@ const Administration = () => {
     setActivityLogs(updatedLogs);
   };
   
+  // --- Форматирование даты/времени для отображения ---
   // Format timestamp for display
   const formatTimestamp = (timestamp) => {
     return new Date(timestamp).toLocaleString();

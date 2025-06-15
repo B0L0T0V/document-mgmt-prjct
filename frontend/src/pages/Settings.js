@@ -3,6 +3,8 @@ import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница настроек пользователя ---
+// Позволяет менять язык, тему интерфейса и пароль пользователя
 function Settings() {
   const { language, changeLanguage, t } = useLanguage();
   
@@ -16,7 +18,7 @@ function Settings() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // Load saved theme on component mount
+  // --- Загрузка и применение темы ---
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);

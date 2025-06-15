@@ -1,6 +1,9 @@
 import os
 import sqlite3
 
+# --- Скрипт для создания и заполнения тестовой базы данных ---
+# Создаёт таблицы пользователей, документов, категорий, сообщений и заполняет их примерами
+
 def create_sample_database():
     # Create SQLite database in the backend directory
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'document_management.db')

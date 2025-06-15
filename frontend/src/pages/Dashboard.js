@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Главная страница (Дашборд) ---
+// Отображает приветствие, основные разделы и быстрые ссылки для пользователя
 function Dashboard() {
   const { t } = useLanguage();
   const user = JSON.parse(localStorage.getItem('user')) || { username: 'Guest' };

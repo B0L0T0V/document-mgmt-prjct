@@ -3,6 +3,9 @@ import { Container, Table, Card, Alert, Button, Modal } from 'react-bootstrap';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница истории изменений документов ---
+// Здесь реализованы функции отображения истории, очистки истории (для админа), форматирования дат
+// История берётся из localStorage
 const History = () => {
   const { t } = useLanguage();
   const [history, setHistory] = useState([]);

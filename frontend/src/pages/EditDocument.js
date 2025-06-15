@@ -4,6 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Страница создания и редактирования документа ---
+// Здесь реализованы функции загрузки, редактирования, экспорта, отправки на согласование, история изменений
+// Данные берутся и сохраняются в localStorage
 function EditDocument() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -100,6 +103,7 @@ function EditDocument() {
     }
   }, [id, isNew, t]);
 
+  // --- Обработка изменения полей формы ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDocument(prev => ({ ...prev, [name]: value }));
@@ -113,6 +117,7 @@ function EditDocument() {
     }
   };
 
+  // --- Обработка загрузки файла, чтение содержимого, поддержка русских кодировок ---
   // Function to try different encodings for file reading
   const tryReadFile = (file) => {
     setEncodingError(false);
@@ -228,6 +233,7 @@ ${t('exportOriginalMessage')}`;
     }));
   };
 
+  // --- Логирование действия в историю документа ---
   const logDocumentHistory = (action, docId, docTitle, reason = null) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const username = user.username || 'Пользователь';
@@ -245,6 +251,7 @@ ${t('exportOriginalMessage')}`;
     localStorage.setItem('document_history', JSON.stringify(history));
   };
 
+  // --- Сохранение документа (создание или обновление) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -336,6 +343,7 @@ ${t('exportOriginalMessage')}`;
     return bytes.buffer;
   };
 
+  // --- Экспорт документа (оригинал или текст) ---
   const handleExport = () => {
     setShowExportModal(true);
   };
@@ -384,6 +392,7 @@ ${t('status')}: ${document.status || t('draft')}
     }
   };
 
+  // --- Отправка документа на согласование ---
   const handleSubmitForApproval = async () => {
     try {
       // Simulate API call
@@ -413,6 +422,7 @@ ${t('status')}: ${document.status || t('draft')}
     }
   };
 
+  // --- Перевод типа документа ---
   // Helper function to translate document type
   const translateDocumentType = (type) => {
     if (!type) return '';

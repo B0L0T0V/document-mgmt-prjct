@@ -1,5 +1,8 @@
 import os
 
+# --- Конфигурация приложения ---
+# Здесь задаются ключевые параметры Flask, SQLAlchemy, JWT и папка для загрузки файлов
+
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'development-secret-key'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'document_management.db')

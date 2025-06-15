@@ -3,11 +3,14 @@ import { Navbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
+// --- Навигационная панель ---
+// Отображает меню для перехода между разделами системы, учитывает роль пользователя, поддерживает смену языка и выход из системы
 function NavigationBar() {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState('user');
   const { language, changeLanguage, t } = useLanguage();
   
+  // --- Получение роли пользователя из localStorage ---
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     if (userData && userData.role) {
@@ -20,6 +23,7 @@ function NavigationBar() {
     navigate('/');
   };
   
+  // --- Основной JSX: меню, выпадающий список языка, кнопка выхода ---
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>

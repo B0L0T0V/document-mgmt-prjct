@@ -1,3 +1,5 @@
+# --- Скрипт для экспорта базы данных ---
+# Экспортирует данные из PostgreSQL в SQLite, копирует структуру и данные таблиц
 import os
 import subprocess
 import sys
@@ -128,5 +130,8 @@ def export_database():
     else:
         print("The database is not PostgreSQL. It may already be a file-based database.")
 
+# --- Основная функция экспорта ---
 if __name__ == "__main__":
-    export_database() 
+    export_database()
+
+# --- Запуск скрипта --- 
