@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+
+
 import { Container, Table, Button, Form, InputGroup, Badge, Modal, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
@@ -196,7 +198,7 @@ function Documents() {
                 <td>{formatDate(doc.updated_at)}</td>
                 <td>
                   <Link to={`/documents/${doc.id}`} className="btn btn-sm btn-info me-2">{t('viewEdit')}</Link>
-                  {(userRole === 'admin' || (doc.status !== 'approved' && doc.status !== 'pending')) && (
+                  {(userRole === 'admin' || userRole === 'manager' || (doc.status !== 'approved' && doc.status !== 'pending')) && (
                     <Button 
                       variant="danger" 
                       size="sm" 

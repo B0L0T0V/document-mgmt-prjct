@@ -195,14 +195,6 @@ const Approval = () => {
                         <td>{formatDate(document.updated_at)}</td>
                         <td>
                           <Button 
-                            variant="primary" 
-                            size="sm" 
-                            onClick={() => handleViewDocument(document)}
-                            className="me-2"
-                          >
-                            {t('view')}
-                          </Button>
-                          <Button 
                             variant="success" 
                             size="sm" 
                             onClick={() => handleApproveDocument(document)}

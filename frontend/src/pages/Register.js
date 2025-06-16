@@ -26,12 +26,12 @@ function Register() {
     
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Пароли не совпадают');
       return;
     }
     
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Пароль должен содержать минимум 6 символов');
       return;
     }
     
@@ -41,7 +41,7 @@ function Register() {
     
     // Check if username exists
     if (existingUsers.some(user => user.username === formData.username)) {
-      setError('Username already exists');
+      setError('Имя пользователя уже существует');
       return;
     }
     
@@ -57,7 +57,7 @@ function Register() {
     existingUsers.push(newUser);
     localStorage.setItem('users', JSON.stringify(existingUsers));
     
-    setSuccess('Registration successful! Redirecting to login...');
+    setSuccess('Регистрация прошла успешно! Перенаправление на вход...');
     setTimeout(() => {
       navigate('/');
     }, 2000);
@@ -66,16 +66,16 @@ function Register() {
   return (
     <Container>
       <div className="login-form">
-        <h2 className="mb-4">Register</h2>
+        <h2 className="mb-4">Регистрация</h2>
         {error && <Alert variant="danger">{error}</Alert>}
         {success && <Alert variant="success">{success}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
+            <Form.Label>Имя пользователя</Form.Label>
             <Form.Control 
               type="text" 
               name="username"
-              placeholder="Enter username" 
+              placeholder="Введите имя пользователя" 
               value={formData.username} 
               onChange={handleChange}
               required
@@ -87,7 +87,7 @@ function Register() {
             <Form.Control 
               type="email"
               name="email" 
-              placeholder="Enter email" 
+              placeholder="Введите email" 
               value={formData.email} 
               onChange={handleChange}
               required
@@ -95,11 +95,11 @@ function Register() {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Password</Form.Label>
+            <Form.Label>Пароль</Form.Label>
             <Form.Control 
               type="password"
               name="password" 
-              placeholder="Password" 
+              placeholder="Пароль" 
               value={formData.password} 
               onChange={handleChange}
               required
@@ -107,11 +107,11 @@ function Register() {
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Confirm Password</Form.Label>
+            <Form.Label>Подтвердите пароль</Form.Label>
             <Form.Control 
               type="password"
               name="confirmPassword" 
-              placeholder="Confirm password" 
+              placeholder="Подтвердите пароль" 
               value={formData.confirmPassword} 
               onChange={handleChange}
               required
@@ -119,11 +119,11 @@ function Register() {
           </Form.Group>
           
           <Button variant="primary" type="submit" className="w-100">
-            Register
+            Зарегистрироваться
           </Button>
           
           <div className="mt-3 text-center">
-            Already have an account? <Link to="/">Login</Link>
+            Уже есть аккаунт? <Link to="/">Войти</Link>
           </div>
         </Form>
       </div>
