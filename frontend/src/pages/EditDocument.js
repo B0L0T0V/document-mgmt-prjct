@@ -3,6 +3,9 @@ import { Container, Form, Button, Tab, Tabs, Alert, ListGroup, Modal, Dropdown }
 import { useParams, useNavigate } from 'react-router-dom';
 import NavigationBar from '../components/NavigationBar';
 import { useLanguage } from '../context/LanguageContext';
+import mammoth from 'mammoth';
+import * as XLSX from 'xlsx';
+import * as pdfjsLib from 'pdfjs-dist';
 
 // --- Страница создания и редактирования документа ---
 // Здесь реализованы функции загрузки, редактирования, экспорта, отправки на согласование, история изменений
@@ -34,6 +37,9 @@ function EditDocument() {
   const [exportFormat, setExportFormat] = useState('docx');
   const [userRole, setUserRole] = useState('user');
   const [encodingError, setEncodingError] = useState(false);
+  const [previewContent, setPreviewContent] = useState('');
+  const [previewType, setPreviewType] = useState('');
+  const [pdfPageImage, setPdfPageImage] = useState(null);
   
   // Function to format date for display
   const formatDate = (dateString) => {
@@ -444,6 +450,77 @@ ${t('status')}: ${document.status || t('draft')}
     return type;
   };
 
+  // Функция для предпросмотра файла
+  const handlePreview = async () => {
+    if (!document.originalFile || !document.fileName) {
+      setPreviewContent(document.content);
+      setPreviewType('txt');
+      setPdfPageImage(null);
+      setShowPreview(true);
+      return;
+    }
+    const ext = document.fileName.split('.').pop().toLowerCase();
+    if (ext === 'docx') {
+      try {
+        const arrayBuffer = document.originalFile;
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        setPreviewContent(result.value);
+        setPreviewType('docx');
+        setPdfPageImage(null);
+      } catch (e) {
+        setPreviewContent('Ошибка при чтении файла docx');
+        setPreviewType('txt');
+        setPdfPageImage(null);
+      }
+    } else if (ext === 'xlsx') {
+      try {
+        const data = new Uint8Array(document.originalFile);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheet];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const html = '<table class="table table-bordered">' +
+          rows.slice(0, 20).map(row => '<tr>' + row.map(cell => `<td>${cell ?? ''}</td>`).join('') + '</tr>').join('') +
+          '</table>';
+        setPreviewContent(html);
+        setPreviewType('xlsx');
+        setPdfPageImage(null);
+      } catch (e) {
+        setPreviewContent('Ошибка при чтении файла xlsx');
+        setPreviewType('txt');
+        setPdfPageImage(null);
+      }
+    } else if (ext === 'pdf') {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        const pdf = await pdfjsLib.getDocument({ data: document.originalFile }).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext('2d');
+        await page.render({ canvasContext: context, viewport }).promise;
+        setPdfPageImage(canvas.toDataURL());
+        setPreviewContent('');
+        setPreviewType('pdf');
+      } catch (e) {
+        setPreviewContent('Ошибка при чтении файла PDF');
+        setPreviewType('txt');
+        setPdfPageImage(null);
+      }
+    } else if (ext === 'txt') {
+      setPreviewContent(document.content);
+      setPreviewType('txt');
+      setPdfPageImage(null);
+    } else {
+      setPreviewContent('Предпросмотр для этого типа файла не поддерживается');
+      setPreviewType('txt');
+      setPdfPageImage(null);
+    }
+    setShowPreview(true);
+  };
+
   return (
     <>
       <NavigationBar />
@@ -572,7 +649,7 @@ ${t('status')}: ${document.status || t('draft')}
                       <Button 
                         variant="link" 
                         size="sm" 
-                        onClick={() => setShowPreview(true)}
+                        onClick={handlePreview}
                       >
                         {t('view')}
                       </Button>
@@ -619,20 +696,22 @@ ${t('status')}: ${document.status || t('draft')}
           {!isNew && (
             <Tab eventKey="history" title={t('history')}>
               <ListGroup className="mb-3">
-                {JSON.parse(localStorage.getItem('document_history') || '[]').map(item => (
-                  <ListGroup.Item key={item.id} className="d-flex flex-column">
-                    <div className="d-flex justify-content-between">
-                      <strong>{item.action}</strong>
-                      <small>{item.timestamp}</small>
-                    </div>
-                    <div className="text-muted">{t('user')}: {item.user}</div>
-                    {item.reason && (
-                      <div className="mt-2 text-danger">
-                        {t('reasonForRejection')}: {item.reason}
+                {JSON.parse(localStorage.getItem('document_history') || '[]')
+                  .filter(item => item.document_id === document.id)
+                  .map(item => (
+                    <ListGroup.Item key={item.id} className="d-flex flex-column">
+                      <div className="d-flex justify-content-between">
+                        <strong>{item.action}</strong>
+                        <small>{item.timestamp}</small>
                       </div>
-                    )}
-                  </ListGroup.Item>
-                ))}
+                      <div className="text-muted">{t('user')}: {item.user}</div>
+                      {item.reason && (
+                        <div className="mt-2 text-danger">
+                          {t('reasonForRejection')}: {item.reason}
+                        </div>
+                      )}
+                    </ListGroup.Item>
+                  ))}
               </ListGroup>
             </Tab>
           )}
@@ -663,7 +742,20 @@ ${t('status')}: ${document.status || t('draft')}
           }} 
           className="document-preview-content p-3 border rounded"
           >
-            {document.content}
+            {previewType === 'docx' && (
+              <div dangerouslySetInnerHTML={{ __html: previewContent }} style={{ fontFamily: 'inherit', fontSize: '15px' }} />
+            )}
+            {previewType === 'xlsx' && (
+              <div dangerouslySetInnerHTML={{ __html: previewContent }} style={{ overflowX: 'auto' }} />
+            )}
+            {previewType === 'pdf' && pdfPageImage && (
+              <img src={pdfPageImage} alt="PDF preview" style={{ maxWidth: '100%' }} />
+            )}
+            {previewType === 'txt' && !pdfPageImage && (
+              <div style={{ whiteSpace: 'pre-wrap', fontFamily: 'Courier New, Courier, monospace', fontSize: '14px' }}>
+                {previewContent}
+              </div>
+            )}
           </div>
         </Modal.Body>
         <Modal.Footer>
